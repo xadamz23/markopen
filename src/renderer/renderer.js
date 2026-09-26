@@ -82,6 +82,16 @@ function renderNodes(nodes, container) {
   }
 }
 
+const sidebarEl = document.getElementById('sidebar');
+const sidebarToggle = document.getElementById('sidebar-toggle');
+const setCollapsed = (collapsed) => {
+  sidebarEl.classList.toggle('collapsed', collapsed);
+  sidebarToggle.textContent = collapsed ? '›' : '‹';
+  sidebarToggle.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+  localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '');
+};
+sidebarToggle.addEventListener('click', () => setCollapsed(!sidebarEl.classList.contains('collapsed')));
+
 const themeToggle = document.getElementById('theme-toggle');
 const updateToggle = () => {
   themeToggle.textContent = darkQuery.matches ? '☀' : '☾';
@@ -106,6 +116,7 @@ async function init() {
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme) await window.markopen.setTheme(savedTheme);
   updateToggle();
+  setCollapsed(localStorage.getItem('sidebarCollapsed') === '1');
 
   const { rootName, tree } = await window.markopen.getTree();
   document.getElementById('root-name').textContent = rootName;
