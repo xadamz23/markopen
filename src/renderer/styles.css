@@ -1,0 +1,138 @@
+:root {
+  color-scheme: light dark;
+  --sidebar-bg: #f6f8fa;
+  --sidebar-border: #d0d7de;
+  --sidebar-fg: #1f2328;
+  --hover-bg: #eaeef2;
+  --active-bg: #ddf4ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sidebar-bg: #161b22;
+    --sidebar-border: #30363d;
+    --sidebar-fg: #e6edf3;
+    --hover-bg: #21262d;
+    --active-bg: #1f3a5f;
+  }
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  display: flex;
+  font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  overflow: auto;
+  padding: 12px 8px;
+  box-sizing: border-box;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  color: var(--sidebar-fg);
+}
+
+#sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px 8px;
+}
+
+#root-name {
+  flex: 1;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#theme-toggle {
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font-size: 15px;
+  line-height: 1;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+
+#theme-toggle:hover {
+  background: var(--hover-bg);
+}
+
+#tree details > :not(summary) {
+  margin-left: 14px;
+}
+
+#tree summary,
+#tree .file {
+  display: block;
+  box-sizing: border-box;
+  width: stretch;
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+
+#tree .file {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+#tree summary::before {
+  content: "▸";
+  display: inline-block;
+  width: 1em;
+  opacity: 0.6;
+}
+
+#tree details[open] > summary::before {
+  content: "▾";
+}
+
+#tree summary:hover,
+#tree .file:hover {
+  background: var(--hover-bg);
+}
+
+#tree .file.active {
+  background: var(--active-bg);
+}
+
+#content {
+  flex: 1;
+  overflow: auto;
+}
+
+#doc {
+  min-height: 100%;
+  box-sizing: border-box;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 48px;
+}
+
+#doc .empty,
+#doc .error {
+  color: #8b949e;
+}
+
+pre.mermaid {
+  background: none;
+  text-align: center;
+}

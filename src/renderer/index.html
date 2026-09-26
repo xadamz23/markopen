@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:">
+  <title>markopen</title>
+  <link rel="stylesheet" href="../../node_modules/github-markdown-css/github-markdown.css">
+  <link rel="stylesheet" href="../../node_modules/@highlightjs/cdn-assets/styles/github.min.css" media="(prefers-color-scheme: light)">
+  <link rel="stylesheet" href="../../node_modules/@highlightjs/cdn-assets/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav id="sidebar">
+    <header id="sidebar-header">
+      <span id="root-name"></span>
+      <button id="theme-toggle" title="Toggle light/dark"></button>
+    </header>
+    <div id="tree"></div>
+  </nav>
+  <main id="content">
+    <article id="doc" class="markdown-body"></article>
+  </main>
+
+  <script src="../../node_modules/markdown-it/dist/browser/markdown-it.umd.min.js"></script>
+  <script src="../../node_modules/@highlightjs/cdn-assets/highlight.min.js"></script>
+  <script src="../../node_modules/dompurify/dist/purify.min.js"></script>
+  <script src="../../node_modules/mermaid/dist/mermaid.min.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>
