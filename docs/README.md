@@ -30,6 +30,7 @@ Moving or renaming this folder means updating the alias.
 - **Rendering:** GitHub-flavored markdown (tables, task lists, strikethrough, autolinks), syntax-highlighted code blocks, and ```` ```mermaid ```` diagrams.
 - **Start page:** opens `README.md` or `index.md` at the root if there is one.
 - **Light/dark toggle:** the ☾/☀ button in the sidebar header. It follows the macOS appearance until you first click it, and after that your choice is remembered.
+- **Collapsible sidebar:** the ‹/› button in the sidebar header folds the explorer to a thin strip, giving the document the full window. The collapsed state is remembered.
 - **External links** open in your default browser.
 
 Not yet supported: links between `.md` files, local images, search, live reload. See [../ROADMAP.md](../ROADMAP.md).

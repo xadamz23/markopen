@@ -27,6 +27,6 @@ Possible features. None of these is committed; v1 is a read-only viewer: explore
 ## App polish
 - **Real .app bundle** with its own name and icon (electron-builder), so the Dock doesn't show "Electron".
 - **Single instance, multiple windows**: one process, and each `markopen` opens a new window in it.
-- **Remember** window size and position, sidebar width, and expanded folders.
+- **Remember** window size and position, sidebar width, and expanded folders. (The sidebar's collapsed state is already remembered.)
 - **Resizable sidebar**.
 - **Lazy tree loading** for very large directories.

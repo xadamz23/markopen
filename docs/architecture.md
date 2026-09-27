@@ -61,6 +61,8 @@ The libraries are loaded as plain `<script>` tags straight from `node_modules` (
 - All colours, including the highlight.js theme (two `<link>`s with `media="(prefers-color-scheme: …)"`), switch on `prefers-color-scheme`.
 - **Toggle:** the button calls `setTheme`, main sets `nativeTheme.themeSource`, and Chromium then flips `prefers-color-scheme` for the page, so every stylesheet follows with no extra CSS. The renderer listens for that media-query change to swap the button icon, re-initialise Mermaid with the matching theme, and re-render the open file, keeping its scroll position.
 - The choice is saved in `localStorage` under `theme` and applied at startup, before the first render. Until you click the toggle, nothing is saved and the app follows macOS.
+- **Sidebar collapse:** the ‹/› button toggles a `collapsed` class on `#sidebar`. That shrinks the sidebar to a 36px strip and hides everything in it except the button. The state is saved in `localStorage` under `sidebarCollapsed` and restored at startup.
+- The document column is capped at 1920px (`#doc` `max-width`) and centred, so it uses most of a wide window.
 
 ## Link handling
 

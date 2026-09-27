@@ -61,3 +61,7 @@ The toggle has two states, light and dark. It follows macOS only until you first
 ## 11. Moved to ~/me/code/personal/markopen (2026-09-25)
 
 The project folder moved from `~/me/tmp/markopen` to `~/me/code/personal/markopen`. The setup commands in the README now use the new path, and the shell alias has to point there too.
+
+## 12. Collapsible sidebar and wider document (2026-09-25)
+
+A ‹/› button in the sidebar header collapses the explorer to a 36px strip, so a document can use the whole window. The collapsed state is saved in `localStorage` (`sidebarCollapsed`) the same way the theme is. The document's max width went from 960px to 1920px so it fills wide windows, and the folder chevrons were made bigger so they're easier to see.
