@@ -13,12 +13,18 @@
 <body>
   <nav id="sidebar">
     <header id="sidebar-header">
-      <button id="sidebar-toggle" title="Collapse sidebar">‹</button>
+      <button id="sidebar-toggle" title="Collapse sidebar" aria-pressed="false">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <rect x="1.5" y="2.5" width="13" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"/>
+          <rect class="panel" x="2.5" y="3.5" width="4" height="9" rx="1" stroke="currentColor" stroke-width="1"/>
+        </svg>
+      </button>
       <span id="root-name"></span>
       <button id="theme-toggle" title="Toggle light/dark"></button>
     </header>
     <div id="tree"></div>
   </nav>
+  <div id="sidebar-resizer" title="Drag to resize, double-click to reset"></div>
   <main id="content">
     <article id="doc" class="markdown-body"></article>
   </main>

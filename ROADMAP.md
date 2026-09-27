@@ -25,8 +25,7 @@ Possible features. None of these is committed; v1 is a read-only viewer: explore
 - **Print / export to PDF**.
 
 ## App polish
-- **Real .app bundle** with its own name and icon (electron-builder), so the Dock doesn't show "Electron".
+- **Standalone .app** (electron-builder) that can live in /Applications. The name and icon are already handled by the local `build/markopen.app` copy.
 - **Single instance, multiple windows**: one process, and each `markopen` opens a new window in it.
-- **Remember** window size and position, sidebar width, and expanded folders. (The sidebar's collapsed state is already remembered.)
-- **Resizable sidebar**.
+- **Remember** window size and position, and expanded folders. (Sidebar width and collapsed state are already remembered.)
 - **Lazy tree loading** for very large directories.

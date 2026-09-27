@@ -18,11 +18,13 @@ There is no global install. The script runs directly from this folder:
 
 ```sh
 cd ~/me/code/personal/markopen
-npm install                                                        # once, downloads Electron + render libs
+npm install                                                        # once: downloads Electron + render libs, builds build/markopen.app
 alias markopen='~/me/code/personal/markopen/bin/markopen.js'       # put in ~/.zshrc; any alias name works
 ```
 
 Moving or renaming this folder means updating the alias.
+
+`npm install` also builds `build/markopen.app`, a local copy of Electron renamed to markopen with its own icon, so the menu bar and Dock say "markopen". Code changes don't need a rebuild, because the bundle loads the code from this folder. Rebuild it with `npm run app` after upgrading Electron.
 
 ## Features (v1)
 
@@ -30,7 +32,8 @@ Moving or renaming this folder means updating the alias.
 - **Rendering:** GitHub-flavored markdown (tables, task lists, strikethrough, autolinks), syntax-highlighted code blocks, and ```` ```mermaid ```` diagrams.
 - **Start page:** opens `README.md` or `index.md` at the root if there is one.
 - **Light/dark toggle:** the ☾/☀ button in the sidebar header. It follows the macOS appearance until you first click it, and after that your choice is remembered.
-- **Collapsible sidebar:** the ‹/› button in the sidebar header folds the explorer to a thin strip, giving the document the full window. The collapsed state is remembered.
+- **Resizable sidebar:** drag its right edge to set the width, between 180px and 600px. Double-click the edge to reset it to 280px. The width is remembered.
+- **Collapsible sidebar:** the sidebar button at the top left folds the explorer to a thin strip, giving the document the full window. The collapsed state is remembered.
 - **External links** open in your default browser.
 
 Not yet supported: links between `.md` files, local images, search, live reload. See [../ROADMAP.md](../ROADMAP.md).
@@ -39,7 +42,9 @@ Not yet supported: links between `.md` files, local images, search, live reload.
 
 ```sh
 npm test                          # unit tests for the file tree (node:test)
-npx electron . /some/dir          # run without the CLI wrapper
+npx electron . /some/dir          # run without the CLI wrapper (menu bar will say "Electron")
+npm run app                       # rebuild build/markopen.app
+npm run icon                      # regenerate assets/icon.icns from assets/icon.svg
 ```
 
 ## Project layout
@@ -51,6 +56,9 @@ src/tree.js              directory walk + path-safety helper (unit tested)
 src/preload.js           the only bridge between the page and Node
 src/renderer/            index.html, renderer.js, styles.css — the UI
 test/tree.test.js        tests for src/tree.js
+assets/                  icon.svg (source) and icon.icns (generated, committed)
+scripts/                 make-app.js (builds the bundle), make-icon.js (svg → icns)
+build/markopen.app       generated app bundle (gitignored)
 docs/                    these docs
 ROADMAP.md               deferred feature ideas
 ```

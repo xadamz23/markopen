@@ -5,6 +5,7 @@
   --sidebar-fg: #1f2328;
   --hover-bg: #eaeef2;
   --active-bg: #ddf4ff;
+  --accent: #0969da;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,6 +15,7 @@
     --sidebar-fg: #e6edf3;
     --hover-bg: #21262d;
     --active-bg: #1f3a5f;
+    --accent: #4493f8;
   }
 }
 
@@ -28,7 +30,7 @@ body {
 }
 
 #sidebar {
-  width: 280px;
+  width: var(--sidebar-width, 280px);
   flex-shrink: 0;
   overflow: auto;
   padding: 12px 8px;
@@ -53,8 +55,7 @@ body {
   white-space: nowrap;
 }
 
-#theme-toggle,
-#sidebar-toggle {
+#theme-toggle {
   border: 0;
   border-radius: 4px;
   background: none;
@@ -65,13 +66,67 @@ body {
   cursor: pointer;
 }
 
-#theme-toggle:hover,
-#sidebar-toggle:hover {
+#theme-toggle:hover {
   background: var(--hover-bg);
 }
 
+#sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
+  background: var(--hover-bg);
+  color: inherit;
+  cursor: pointer;
+}
+
+#sidebar-toggle .panel {
+  fill: currentColor;
+}
+
+#sidebar-toggle[aria-pressed="true"] .panel {
+  fill: none;
+}
+
+#sidebar-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+#sidebar-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+#sidebar-resizer {
+  flex-shrink: 0;
+  width: 5px;
+  margin-left: -3px;
+  z-index: 1;
+  cursor: col-resize;
+}
+
+#sidebar-resizer:hover,
+body.resizing #sidebar-resizer {
+  background: var(--accent);
+}
+
+#sidebar.collapsed + #sidebar-resizer {
+  display: none;
+}
+
+body.resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
 #sidebar.collapsed {
-  width: 36px;
+  width: 44px;
   padding: 12px 4px;
   overflow: hidden;
 }
@@ -83,6 +138,7 @@ body {
 }
 
 #sidebar.collapsed #sidebar-header {
+  justify-content: center;
   padding: 0 0 8px;
 }
 

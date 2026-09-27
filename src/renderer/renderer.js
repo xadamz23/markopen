@@ -86,11 +86,42 @@ const sidebarEl = document.getElementById('sidebar');
 const sidebarToggle = document.getElementById('sidebar-toggle');
 const setCollapsed = (collapsed) => {
   sidebarEl.classList.toggle('collapsed', collapsed);
-  sidebarToggle.textContent = collapsed ? '›' : '‹';
+  sidebarToggle.setAttribute('aria-pressed', String(collapsed));
   sidebarToggle.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
   localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '');
 };
 sidebarToggle.addEventListener('click', () => setCollapsed(!sidebarEl.classList.contains('collapsed')));
+
+// Drag the sidebar's right edge to resize; double-click resets. The document always keeps at least 320px.
+const SIDEBAR_MIN = 180;
+const SIDEBAR_MAX = 600;
+const SIDEBAR_DEFAULT = 280;
+const resizer = document.getElementById('sidebar-resizer');
+let sidebarWidth = SIDEBAR_DEFAULT;
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+const setSidebarWidth = (px) => {
+  sidebarWidth = Math.round(clamp(px, SIDEBAR_MIN, SIDEBAR_MAX));
+  const shown = clamp(sidebarWidth, SIDEBAR_MIN, window.innerWidth - 320);
+  document.documentElement.style.setProperty('--sidebar-width', `${shown}px`);
+};
+resizer.addEventListener('pointerdown', (event) => {
+  resizer.setPointerCapture(event.pointerId);
+  document.body.classList.add('resizing');
+});
+resizer.addEventListener('pointermove', (event) => {
+  if (resizer.hasPointerCapture(event.pointerId)) setSidebarWidth(event.clientX);
+});
+resizer.addEventListener('pointerup', (event) => {
+  resizer.releasePointerCapture(event.pointerId);
+  document.body.classList.remove('resizing');
+  localStorage.setItem('sidebarWidth', sidebarWidth);
+});
+resizer.addEventListener('dblclick', () => {
+  setSidebarWidth(SIDEBAR_DEFAULT);
+  localStorage.setItem('sidebarWidth', sidebarWidth);
+});
+// Shrinking the window re-clamps; growing it back restores the width you chose.
+window.addEventListener('resize', () => setSidebarWidth(sidebarWidth));
 
 const themeToggle = document.getElementById('theme-toggle');
 const updateToggle = () => {
@@ -117,6 +148,7 @@ async function init() {
   if (savedTheme) await window.markopen.setTheme(savedTheme);
   updateToggle();
   setCollapsed(localStorage.getItem('sidebarCollapsed') === '1');
+  setSidebarWidth(Number(localStorage.getItem('sidebarWidth')) || SIDEBAR_DEFAULT);
 
   const { rootName, tree } = await window.markopen.getTree();
   document.getElementById('root-name').textContent = rootName;

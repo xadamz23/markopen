@@ -12,9 +12,17 @@ flowchart LR
   D -->|"IPC: tree / read / set-theme"| C
 ```
 
-1. `bin/markopen.js` resolves the argument (default `.`) and exits with an error if it isn't a directory. It then runs `electron <appDir> <dir>` as a detached child and exits, so the terminal is free immediately.
+1. `bin/markopen.js` resolves the argument (default `.`) and exits with an error if it isn't a directory. It then runs `build/markopen.app/Contents/MacOS/Electron <appDir> <dir>` as a detached child and exits, so the terminal is free immediately. If the bundle is missing, it tells you to run `npm install`.
 2. `src/main.js` treats the last command-line argument as the root directory. It registers the IPC handlers and opens one window titled `markopen — <dir name>`. Closing the window quits the process.
 3. The renderer asks main for the tree, draws the explorer, and asks for file contents when you click a file.
+
+## App bundle (`scripts/make-app.js`)
+
+macOS takes the menu-bar name, Dock name and icon from the running bundle's `Info.plist`, not from anything the app can set at runtime. So `postinstall` copies `node_modules/electron/dist/Electron.app` to `build/markopen.app`. It then sets `CFBundleName`/`CFBundleDisplayName` to `markopen` and `CFBundleIdentifier` to `com.adamstahl.markopen`, and overwrites `Resources/electron.icns` with `assets/icon.icns`. The executable and helper apps keep their "Electron" names so Electron can still find its helpers. No re-signing is needed: the binary's linker ad-hoc signature doesn't bind `Info.plist` (`codesign -dv` shows `Info.plist=not bound`).
+
+The bundle holds no app code; it's passed the project folder as its app path. That's why the `../../node_modules/...` script paths still work and edits show up on the next launch.
+
+`assets/icon.icns` is generated from `assets/icon.svg` by `scripts/make-icon.js`. That script renders the SVG in an offscreen Electron window, resizes it into an `.iconset`, and runs `iconutil`.
 
 ## Processes and the IPC surface
 
@@ -61,7 +69,8 @@ The libraries are loaded as plain `<script>` tags straight from `node_modules` (
 - All colours, including the highlight.js theme (two `<link>`s with `media="(prefers-color-scheme: …)"`), switch on `prefers-color-scheme`.
 - **Toggle:** the button calls `setTheme`, main sets `nativeTheme.themeSource`, and Chromium then flips `prefers-color-scheme` for the page, so every stylesheet follows with no extra CSS. The renderer listens for that media-query change to swap the button icon, re-initialise Mermaid with the matching theme, and re-render the open file, keeping its scroll position.
 - The choice is saved in `localStorage` under `theme` and applied at startup, before the first render. Until you click the toggle, nothing is saved and the app follows macOS.
-- **Sidebar collapse:** the ‹/› button toggles a `collapsed` class on `#sidebar`. That shrinks the sidebar to a 36px strip and hides everything in it except the button. The state is saved in `localStorage` under `sidebarCollapsed` and restored at startup.
+- **Sidebar collapse:** the button (an inline SVG sidebar icon) toggles a `collapsed` class on `#sidebar` and sets `aria-pressed`. That shrinks the sidebar to a 44px strip and hides everything in it except the button. The icon's panel switches from filled to outlined. The state is saved in `localStorage` under `sidebarCollapsed` and restored at startup.
+- **Sidebar resize:** `#sidebar-resizer` is a 5px strip over the sidebar's right border. Dragging it uses pointer capture and sets the `--sidebar-width` CSS variable. The chosen width is clamped to 180–600px and saved as `sidebarWidth` on pointer-up. The width actually shown is also capped so the document keeps at least 320px. Shrinking the window narrows the sidebar, and growing it back restores the chosen width. Double-clicking resets to 280px. The resizer is hidden while the sidebar is collapsed.
 - The document column is capped at 1920px (`#doc` `max-width`) and centred, so it uses most of a wide window.
 
 ## Link handling
@@ -71,4 +80,4 @@ The window must never navigate away from the viewer. `will-navigate` is always c
 ## Testing
 
 - `npm test` runs `test/tree.test.js` (node:test) against a temporary directory fixture. It covers filtering, pruning, sorting, nesting and path-escape rejection.
-- The UI was checked by running a throwaway Electron script. It loads `src/main.js`, inspects the DOM via `executeJavaScript` and saves `webContents.capturePage()` screenshots, because macOS `screencapture` isn't permitted from the terminal here. That script isn't kept in the repo.
+- The UI was checked by running a throwaway Electron script. Drags need `sendInputEvent` mouse moves with `modifiers: ['leftButtonDown']`; without it, pointer capture doesn't hold. It loads `src/main.js`, inspects the DOM via `executeJavaScript` and saves `webContents.capturePage()` screenshots, because macOS `screencapture` isn't permitted from the terminal here. That script isn't kept in the repo.

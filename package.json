@@ -5,7 +5,10 @@
   "private": true,
   "main": "src/main.js",
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test test/",
+    "postinstall": "node scripts/make-app.js",
+    "app": "node scripts/make-app.js",
+    "icon": "node node_modules/electron/cli.js scripts/make-icon.js"
   },
   "dependencies": {
     "@highlightjs/cdn-assets": "^11.12.0",

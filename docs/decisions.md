@@ -65,3 +65,15 @@ The project folder moved from `~/me/tmp/markopen` to `~/me/code/personal/markope
 ## 12. Collapsible sidebar and wider document (2026-09-25)
 
 A ‹/› button in the sidebar header collapses the explorer to a 36px strip, so a document can use the whole window. The collapsed state is saved in `localStorage` (`sidebarCollapsed`) the same way the theme is. The document's max width went from 960px to 1920px so it fills wide windows, and the folder chevrons were made bigger so they're easier to see.
+
+## 13. Own app name and icon through a local bundle copy (2026-09-27)
+
+The menu bar showed "Electron" because macOS reads the app name from the bundle's `Info.plist`, and `app.setName()` can't change that. **Options considered:**
+- `@electron/packager`: a proper packaged `.app`. But it's a new dependency, and every code change would need a rebuild.
+- **A local bundle copy (chosen).** `postinstall` copies Electron.app to a gitignored `build/markopen.app`, renames it in `Info.plist` and swaps in our icon. The CLI launches that copy with the project folder as the app path, so the code still runs from source with no build step (keeping #4).
+
+This replaces the "Electron" Dock name noted in #7. It's still one process per window. No re-signing is done, because Electron's linker ad-hoc signature doesn't cover `Info.plist`. Also, this machine's `node_modules` has no symlinks, so `codesign --deep` fails on the framework anyway. The icon is a document with an M↓ mark on an indigo→blue tile. It's drawn as `assets/icon.svg` and turned into `icon.icns` by `npm run icon`, and both files are committed.
+
+## 14. Resizable sidebar and a clearer collapse button (2026-09-27)
+
+The sidebar's right edge can be dragged between 180px and 600px, and double-clicking it resets to 280px. The document always keeps at least 320px. The width is stored in `localStorage` (`sidebarWidth`) alongside the theme and collapsed state. The ‹/› glyph was too faint, so the collapse button is now a bordered 28px button with a sidebar icon whose panel is filled when open and outlined when collapsed.
