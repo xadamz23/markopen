@@ -85,3 +85,24 @@ The open file re-renders when it changes on disk, keeping its scroll position. T
 - **Node's `fs.watch(root, { recursive: true })` (chosen).** On macOS it's backed by FSEvents, so one watcher covers the whole tree.
 
 Events are debounced for 150ms so an editor's write-temp-then-rename save becomes one update. Main rebuilds the whole tree on every batch (the vault takes about 7ms) and sends it only if it changed, which keeps the renderer from redrawing the sidebar on every save.
+
+## 16. Navigation, finding and Obsidian support (2026-09-28)
+
+After a codebase review, Adam picked these from a ranked list:
+- **Bug fixes:** a broken Mermaid block no longer blanks the page, `#heading` links work, and quick clicks can't leave the wrong file showing.
+- **Navigation:** relative `.md` links and images, and back/forward history.
+- **Finding:** find in page, a filename filter and quick open, and full-text search.
+- **Obsidian:** a frontmatter Properties table, and wikilinks and embeds.
+- **Extras:** document zoom, a copy button on code blocks, Open in VS Code and Reveal in Finder, and a document header with the path and modified time.
+- **Polish:** less flicker on reload, and indent guides and icons in the tree. The `.md` extension stays visible.
+
+Lazy tree loading was dropped for now. The filter, the search and wikilink resolution all need the full file list anyway, and the vault walks in 7ms. Choices made along the way:
+
+- **Local images through a `markopen:` protocol**, not by loosening the CSP to `file:`. The handler goes through `resolveInsideRoot`, so the page still can't read outside the root (decision 5).
+- **Find in page with the CSS Custom Highlight API**, not `webContents.findInPage`. `findInPage` matches the text typed into its own find box and moves focus. Highlights leave the DOM untouched and survive a re-render. The cost: a match can't span formatting.
+- **Our own app menu.** The default View menu's ⌘+/⌘- zoom the whole page. Owning the menu lets zoom apply to the document only, and gives ⌘F, ⌘P, ⇧⌘F and ⌘[ / ⌘] a home that also shows up in the menu bar.
+- **js-yaml for frontmatter.** It's the one new dependency, and it ships a UMD browser build, so there's still no bundler (decision 4). Frontmatter that doesn't parse is shown raw. Adam chose a collapsed "Properties" table over hiding the frontmatter or always showing it.
+- **Quick open and the filter box both**, as Adam chose, sharing one overlay with search in files.
+- **Open in VS Code** uses `open -a "Visual Studio Code"`. The `code` CLI isn't reliably on the PATH of an app started from the Dock.
+- **Embeds go one level deep.** An embedded note's own embeds render as links, so a note that embeds itself can't loop.
+- **Off-DOM rendering.** Each render is built in a detached element and swapped in, with `mermaid.render` per diagram. That fixed the Mermaid failure and the reload flicker in one change.
