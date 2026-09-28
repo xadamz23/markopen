@@ -62,10 +62,19 @@ async function openFile(rel, button) {
   }
 }
 
+// Re-render the open file (after a theme switch or a change on disk), keeping the scroll position.
+async function rerenderActive() {
+  if (!activeRel) return;
+  const scroll = contentEl.scrollTop;
+  await openFile(activeRel, activeButton);
+  contentEl.scrollTop = scroll;
+}
+
 function renderNodes(nodes, container) {
   for (const node of nodes) {
     if (node.type === 'dir') {
       const details = document.createElement('details');
+      details.dataset.path = node.path;
       const summary = document.createElement('summary');
       summary.textContent = node.name;
       details.append(summary);
@@ -137,10 +146,32 @@ themeToggle.addEventListener('click', () => {
 darkQuery.addEventListener('change', async () => {
   updateToggle();
   initMermaid();
-  if (!activeRel) return;
-  const scroll = contentEl.scrollTop;
-  await openFile(activeRel, activeButton);
-  contentEl.scrollTop = scroll;
+  await rerenderActive();
+});
+
+// Live updates from disk. Redraw the tree keeping open folders and the selection.
+window.markopen.onTreeChanged((tree) => {
+  const open = new Set([...treeEl.querySelectorAll('details[open]')].map((d) => d.dataset.path));
+  treeEl.replaceChildren();
+  renderNodes(tree, treeEl);
+  for (const details of treeEl.querySelectorAll('details')) details.open = open.has(details.dataset.path);
+
+  if (activeRel) {
+    activeButton = treeEl.querySelector(`button[title="${CSS.escape(activeRel)}"]`);
+    if (activeButton) {
+      activeButton.classList.add('active');
+    } else {
+      activeRel = null;
+      docEl.innerHTML = '<p class="empty">This file was removed.</p>';
+    }
+  } else if (docEl.querySelector('p.empty')) {
+    docEl.innerHTML = tree.length
+      ? '<p class="empty">Select a file.</p>'
+      : '<p class="empty">No markdown files in this directory.</p>';
+  }
+});
+window.markopen.onFilesChanged((paths) => {
+  if (activeRel && (!paths || paths.includes(activeRel))) rerenderActive();
 });
 
 async function init() {

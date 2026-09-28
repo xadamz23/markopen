@@ -1,7 +1,8 @@
 const { app, BrowserWindow, ipcMain, nativeTheme, shell } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
-const { buildTree, resolveInsideRoot } = require('./tree');
+const { MD_EXT, buildTree, resolveInsideRoot } = require('./tree');
+const { watchRoot } = require('./watch');
 
 // Launched as: electron <appDir> <rootDir>
 const root = path.resolve(process.argv.at(-1));
@@ -41,6 +42,20 @@ function createWindow() {
   win.on('page-title-updated', (event) => event.preventDefault());
 
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+
+  // Push disk changes to the page: a new tree only if it actually changed, and which markdown files changed
+  // (null = unknown, re-render whatever is open).
+  let lastTree = JSON.stringify(buildTree(root));
+  const watcher = watchRoot(root, (paths) => {
+    const tree = buildTree(root);
+    const json = JSON.stringify(tree);
+    if (json !== lastTree) {
+      lastTree = json;
+      win.webContents.send('tree-changed', tree);
+    }
+    win.webContents.send('files-changed', paths && paths.filter((rel) => MD_EXT.test(rel)));
+  });
+  win.on('closed', () => watcher.close());
 }
 
 app.whenReady().then(createWindow);

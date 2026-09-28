@@ -34,14 +34,15 @@ Moving or renaming this folder means updating the alias.
 - **Light/dark toggle:** the ☾/☀ button in the sidebar header. It follows the macOS appearance until you first click it, and after that your choice is remembered.
 - **Resizable sidebar:** drag its right edge to set the width, between 180px and 600px. Double-click the edge to reset it to 280px. The width is remembered.
 - **Collapsible sidebar:** the sidebar button at the top left folds the explorer to a thin strip, giving the document the full window. The collapsed state is remembered.
+- **Live updates:** the open file re-renders when it's saved, keeping your scroll position. The explorer picks up markdown files and folders that are added, removed or renamed, and keeps open folders open.
 - **External links** open in your default browser.
 
-Not yet supported: links between `.md` files, local images, search, live reload. See [../ROADMAP.md](../ROADMAP.md).
+Not yet supported: links between `.md` files, local images, search. See [../ROADMAP.md](../ROADMAP.md).
 
 ## Development
 
 ```sh
-npm test                          # unit tests for the file tree (node:test)
+npm test                          # unit tests for the file tree and watcher (node:test)
 npx electron . /some/dir          # run without the CLI wrapper (menu bar will say "Electron")
 npm run app                       # rebuild build/markopen.app
 npm run icon                      # regenerate assets/icon.icns from assets/icon.svg

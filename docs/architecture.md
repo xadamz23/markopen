@@ -1,6 +1,6 @@
 # Architecture
 
-markopen is a small Electron app: no bundler, no framework, about 400 lines of our own code (JS, HTML, CSS).
+markopen is a small Electron app: no bundler, no framework, about 600 lines of our own code (JS, HTML, CSS).
 
 ## Launch flow
 
@@ -10,6 +10,7 @@ flowchart LR
   B -->|"spawn detached, then exit"| C["Electron main<br/>src/main.js"]
   C -->|"BrowserWindow + preload"| D["Renderer<br/>src/renderer/"]
   D -->|"IPC: tree / read / set-theme"| C
+  C -->|"events: tree-changed / files-changed"| D
 ```
 
 1. `bin/markopen.js` resolves the argument (default `.`) and exits with an error if it isn't a directory. It then runs `build/markopen.app/Contents/MacOS/Electron <appDir> <dir>` as a detached child and exits, so the terminal is free immediately. If the bundle is missing, it tells you to run `npm install`.
@@ -26,13 +27,20 @@ The bundle holds no app code; it's passed the project folder as its app path. Th
 
 ## Processes and the IPC surface
 
-The page runs with `contextIsolation: true`, `sandbox: true` and `nodeIntegration: false`, so it has no Node or filesystem access of its own. `src/preload.js` exposes exactly three calls as `window.markopen`:
+The page runs with `contextIsolation: true`, `sandbox: true` and `nodeIntegration: false`, so it has no Node or filesystem access of its own. `src/preload.js` exposes exactly three request calls as `window.markopen`:
 
 | Call | Main-process handler | Returns |
 |---|---|---|
 | `getTree()` | `buildTree(root)` | `{ rootName, tree }` |
 | `readFile(rel)` | `fs.readFileSync(resolveInsideRoot(root, rel))` | file text |
 | `setTheme('light' \| 'dark')` | `nativeTheme.themeSource = …` | nothing |
+
+Main also pushes two events, which the page subscribes to through `onTreeChanged(cb)` and `onFilesChanged(cb)`:
+
+| Event | Payload | Sent when |
+|---|---|---|
+| `tree-changed` | the new tree | the rebuilt tree differs from the last one sent |
+| `files-changed` | changed markdown paths, or `null` if unknown | after every batch of disk changes |
 
 `resolveInsideRoot` (in `src/tree.js`) rejects any path that resolves outside the opened directory. That means even a compromised page can only read files under the root.
 
@@ -47,6 +55,16 @@ The page runs with `contextIsolation: true`, `sandbox: true` and `nodeIntegratio
 - silently skip folders that can't be read
 
 The whole tree is built upfront. That's fast for normal directories (the Obsidian vault, 173 files, takes about 7ms), but it's a known limit for huge trees (see the roadmap).
+
+## Live updates (`src/watch.js`)
+
+`watchRoot(root, onChange)` puts one recursive `fs.watch` on the root (FSEvents on macOS). It drops events under dot-folders and `node_modules`, the same rules `buildTree` uses. It collects the changed paths and calls `onChange` once 150ms after the last event, because editors often save as write-temp-then-rename. If FSEvents doesn't give a filename, the batch is `null`.
+
+For each batch, main rebuilds the tree and sends `tree-changed` only if its JSON differs from the last tree sent. So saving a note, or adding a `.txt` file, doesn't redraw the sidebar. It then sends `files-changed`. The renderer:
+- re-renders the open file if it's in the list (or the list is `null`), keeping the scroll position. The theme toggle uses the same `rerenderActive()` helper.
+- redraws the tree on `tree-changed`, re-opens the folders that were open (each `<details>` carries `data-path`) and re-selects the active file. If the open file is gone, the document shows "This file was removed."
+
+The watcher is closed when the window closes.
 
 ## Rendering pipeline (`src/renderer/renderer.js`)
 
@@ -80,4 +98,5 @@ The window must never navigate away from the viewer. `will-navigate` is always c
 ## Testing
 
 - `npm test` runs `test/tree.test.js` (node:test) against a temporary directory fixture. It covers filtering, pruning, sorting, nesting and path-escape rejection.
+- `test/watch.test.js` checks that bursts of writes arrive as one batch, that dot-folders and `node_modules` are ignored, and that paths are root-relative. It waits before starting the watcher, because FSEvents otherwise reports the temp folder's own creation.
 - The UI was checked by running a throwaway Electron script. Drags need `sendInputEvent` mouse moves with `modifiers: ['leftButtonDown']`; without it, pointer capture doesn't hold. It loads `src/main.js`, inspects the DOM via `executeJavaScript` and saves `webContents.capturePage()` screenshots, because macOS `screencapture` isn't permitted from the terminal here. That script isn't kept in the repo.

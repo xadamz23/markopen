@@ -77,3 +77,11 @@ This replaces the "Electron" Dock name noted in #7. It's still one process per w
 ## 14. Resizable sidebar and a clearer collapse button (2026-09-27)
 
 The sidebar's right edge can be dragged between 180px and 600px, and double-clicking it resets to 280px. The document always keeps at least 320px. The width is stored in `localStorage` (`sidebarWidth`) alongside the theme and collapsed state. The ‹/› glyph was too faint, so the collapse button is now a bordered 28px button with a sidebar icon whose panel is filled when open and outlined when collapsed.
+
+## 15. Live reload and tree refresh through one recursive fs.watch (2026-09-28)
+
+The open file re-renders when it changes on disk, keeping its scroll position. The sidebar updates when markdown files or folders are added, removed or renamed, keeping open folders and the selection. **Options considered:**
+- chokidar: the usual choice, but it's a new dependency, and its cross-platform handling isn't needed in a macOS-only app.
+- **Node's `fs.watch(root, { recursive: true })` (chosen).** On macOS it's backed by FSEvents, so one watcher covers the whole tree.
+
+Events are debounced for 150ms so an editor's write-temp-then-rename save becomes one update. Main rebuilds the whole tree on every batch (the vault takes about 7ms) and sends it only if it changed, which keeps the renderer from redrawing the sidebar on every save.

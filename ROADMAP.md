@@ -13,10 +13,6 @@ Possible features. None of these is committed; v1 is a read-only viewer: explore
 - **Filename filter** box above the explorer.
 - **Full-text search** across all markdown in the directory.
 
-## Live updates
-- **Live reload**: re-render the current file when it changes on disk.
-- **Tree refresh**: pick up files that are added, removed or renamed.
-
 ## Rendering
 - **Obsidian extras**: `[[wikilinks]]`, `![[embeds]]`, YAML frontmatter shown as a table or hidden.
 - **Math** via KaTeX (`$inline$`, `$$block$$`).

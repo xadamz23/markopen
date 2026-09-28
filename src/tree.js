@@ -38,4 +38,4 @@ function resolveInsideRoot(root, rel) {
   return abs;
 }
 
-module.exports = { buildTree, resolveInsideRoot };
+module.exports = { MD_EXT, buildTree, resolveInsideRoot };
