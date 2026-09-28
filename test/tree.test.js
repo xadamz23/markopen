@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { buildTree, resolveInsideRoot } = require('../src/tree');
+const { buildTree, flattenFiles, searchFiles, findByName, resolveInsideRoot } = require('../src/tree');
 
 let root;
 
@@ -19,7 +19,7 @@ before(() => {
   touch('b.markdown');
   touch('a.md');
   touch('notes.txt');
-  touch('docs/guide.md');
+  touch('docs/guide.md', '# Guide\nInstall with npm.\nthen NPM again\n');
   touch('docs/deep/more.md');
   touch('zeta/only.md');
   touch('images/pic.png');
@@ -60,4 +60,36 @@ test('resolveInsideRoot rejects paths escaping root', () => {
   assert.throws(() => resolveInsideRoot(root, '../outside.md'));
   assert.throws(() => resolveInsideRoot(root, '/etc/passwd'));
   assert.throws(() => resolveInsideRoot(root, 'docs/../../x.md'));
+});
+
+test('flattenFiles lists every file path', () => {
+  assert.deepEqual(flattenFiles(buildTree(root)), [
+    path.join('docs', 'deep', 'more.md'),
+    path.join('docs', 'guide.md'),
+    path.join('zeta', 'only.md'),
+    'a.md',
+    'b.markdown',
+    'README.md',
+  ]);
+});
+
+test('searchFiles finds case-insensitive matches with line numbers', () => {
+  const files = flattenFiles(buildTree(root));
+  assert.deepEqual(searchFiles(root, files, 'npm'), [
+    {
+      path: path.join('docs', 'guide.md'),
+      matches: [
+        { line: 2, text: 'Install with npm.' },
+        { line: 3, text: 'then NPM again' },
+      ],
+    },
+  ]);
+  assert.equal(searchFiles(root, files, 'npm', 1)[0].matches.length, 1);
+  assert.deepEqual(searchFiles(root, files, 'nothing-here'), []);
+});
+
+test('findByName finds any file type by basename, skipping hidden folders', () => {
+  assert.equal(findByName(root, 'PIC.png'), path.join('images', 'pic.png'));
+  assert.equal(findByName(root, 'secret.md'), null);
+  assert.equal(findByName(root, 'missing.png'), null);
 });

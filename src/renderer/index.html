@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:">
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' markopen: data: https:; font-src 'self' data:">
   <title>markopen</title>
   <link rel="stylesheet" href="../../node_modules/github-markdown-css/github-markdown.css">
   <link rel="stylesheet" href="../../node_modules/@highlightjs/cdn-assets/styles/github.min.css" media="(prefers-color-scheme: light)">
@@ -22,17 +22,44 @@
       <span id="root-name"></span>
       <button id="theme-toggle" title="Toggle light/dark"></button>
     </header>
+    <input id="filter" type="search" placeholder="Filter files" spellcheck="false">
     <div id="tree"></div>
   </nav>
   <div id="sidebar-resizer" title="Drag to resize, double-click to reset"></div>
   <main id="content">
+    <header id="doc-header" hidden>
+      <button id="back" class="icon-button" title="Back (⌘[)" disabled>‹</button>
+      <button id="forward" class="icon-button" title="Forward (⌘])" disabled>›</button>
+      <nav id="breadcrumb"></nav>
+      <span id="modified"></span>
+      <button id="open-editor" class="text-button" title="Open this file in VS Code">Open in VS Code</button>
+      <button id="reveal" class="text-button" title="Show this file in Finder">Reveal in Finder</button>
+      <div id="find-bar" hidden>
+        <input id="find-input" type="text" placeholder="Find" spellcheck="false">
+        <span id="find-count"></span>
+        <button id="find-prev" class="icon-button" title="Previous (⇧⌘G)">↑</button>
+        <button id="find-next" class="icon-button" title="Next (⌘G)">↓</button>
+        <button id="find-close" class="icon-button" title="Close (Esc)">×</button>
+      </div>
+    </header>
     <article id="doc" class="markdown-body"></article>
   </main>
+  <div id="overlay" hidden>
+    <div id="palette" role="dialog">
+      <input id="palette-input" type="text" spellcheck="false">
+      <ul id="palette-results"></ul>
+    </div>
+  </div>
 
   <script src="../../node_modules/markdown-it/dist/browser/markdown-it.umd.min.js"></script>
   <script src="../../node_modules/@highlightjs/cdn-assets/highlight.min.js"></script>
   <script src="../../node_modules/dompurify/dist/purify.min.js"></script>
   <script src="../../node_modules/mermaid/dist/mermaid.min.js"></script>
+  <script src="../../node_modules/js-yaml/dist/browser/js-yaml.umd.min.js"></script>
+  <script src="lib.js"></script>
+  <script src="render.js"></script>
+  <script src="find.js"></script>
+  <script src="palette.js"></script>
   <script src="renderer.js"></script>
 </body>
 </html>
