@@ -8,7 +8,7 @@ Possible features. None of these is committed.
 
 ## Rendering
 - **Math** via KaTeX (`$inline$`, `$$block$$`).
-- **Footnotes, definition lists, GitHub alerts** (`> [!NOTE]`).
+- **Footnotes, definition lists**.
 - **Print / export to PDF**.
 
 ## App polish

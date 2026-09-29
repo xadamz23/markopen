@@ -582,3 +582,31 @@ details.properties .tag {
   border-radius: 10px;
   background: var(--active-bg);
 }
+
+/* Loose lists (blank lines between items): half of GitHub's 16px paragraph gap. */
+.markdown-body li > p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.markdown-alert-title .octicon {
+  margin-right: 8px;
+}
+
+summary.markdown-alert-title {
+  cursor: pointer;
+}
+
+summary.markdown-alert-title::after {
+  content: "▸";
+  margin-left: 6px;
+  opacity: 0.7;
+}
+
+details[open] > summary.markdown-alert-title {
+  margin-bottom: 16px;
+}
+
+details[open] > summary.markdown-alert-title::after {
+  content: "▾";
+}

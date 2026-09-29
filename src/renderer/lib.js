@@ -93,5 +93,24 @@
     return { data: match[1], body: text.slice(match[0].length) };
   }
 
-  Object.assign(exports, { MD_EXT, joinRel, slugify, createSlugger, resolveWikilink, fuzzyScore, splitFrontmatter });
+  // Obsidian callout types, mapped onto GitHub's five alert colors. Unknown types are notes.
+  const CALLOUT_TYPES = {
+    note: ['note', 'info', 'todo', 'abstract', 'summary', 'tldr', 'quote', 'cite'],
+    tip: ['tip', 'hint', 'success', 'check', 'done', 'example'],
+    important: ['important', 'question', 'help', 'faq'],
+    warning: ['warning', 'attention'],
+    caution: ['caution', 'danger', 'error', 'bug', 'failure', 'fail', 'missing'],
+  };
+
+  // Parses a "[!type]" alert/callout marker line: "[!NOTE]", "[!tip] Title", "[!info]- Folded".
+  function parseCallout(line) {
+    const match = /^\[!(\w+)\]([+-]?)[ \t]*(.*)$/.exec(line);
+    if (!match) return null;
+    const name = match[1].toLowerCase();
+    const type = Object.keys(CALLOUT_TYPES).find((key) => CALLOUT_TYPES[key].includes(name)) ?? 'note';
+    const title = match[3].trim() || name[0].toUpperCase() + name.slice(1);
+    return { type, fold: match[2], title };
+  }
+
+  Object.assign(exports, { MD_EXT, joinRel, slugify, createSlugger, resolveWikilink, fuzzyScore, splitFrontmatter, parseCallout });
 })(typeof module === 'object' ? module.exports : (window.markopenLib = {}));

@@ -106,3 +106,8 @@ Lazy tree loading was dropped for now. The filter, the search and wikilink resol
 - **Open in VS Code** uses `open -a "Visual Studio Code"`. The `code` CLI isn't reliably on the PATH of an app started from the Dock.
 - **Embeds go one level deep.** An embedded note's own embeds render as links, so a note that embeds itself can't loop.
 - **Off-DOM rendering.** Each render is built in a detached element and swapped in, with `mermaid.render` per diagram. That fixed the Mermaid failure and the reload flicker in one change.
+
+## 17. Alerts, callouts and loose-list spacing (2026-09-29)
+
+- **One syntax for GitHub alerts and Obsidian callouts.** A markdown-it core rule turns a blockquote that starts with `[!type]` into GitHub's `markdown-alert` HTML, so github-markdown-css already styles it. Obsidian's many types map onto GitHub's five colors (`parseCallout` in `lib.js`). Unknown types show as notes, as in Obsidian. A fold marker (`-` / `+`) makes it a `<details>`.
+- **Loose lists get half of GitHub's gap.** A blank line anywhere in a list makes every item a paragraph, and github-markdown-css spaces those 16px apart. We use 8px: tighter, but still looser than a tight list, so multi-paragraph items stay readable. Back-to-back separate lists (switching `-` → `*` → `+`) keep their margin, so they don't read as one list.

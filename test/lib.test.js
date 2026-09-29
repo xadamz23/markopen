@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { joinRel, slugify, createSlugger, resolveWikilink, fuzzyScore, splitFrontmatter } = require('../src/renderer/lib');
+const { joinRel, slugify, createSlugger, resolveWikilink, fuzzyScore, splitFrontmatter, parseCallout } = require('../src/renderer/lib');
 
 test('joinRel resolves relative to the current file folder', () => {
   assert.deepEqual(joinRel('docs/guide.md', 'other.md'), { rel: 'docs/other.md', frag: '' });
@@ -52,4 +52,23 @@ test('splitFrontmatter separates a leading YAML block', () => {
   assert.deepEqual(splitFrontmatter('---\ntitle: Hi\ntags: [a]\n---\n# Body\n'), { data: 'title: Hi\ntags: [a]', body: '# Body\n' });
   assert.deepEqual(splitFrontmatter('# No frontmatter\n---\n'), { data: null, body: '# No frontmatter\n---\n' });
   assert.deepEqual(splitFrontmatter('---\na: 1\n---'), { data: 'a: 1', body: '' });
+});
+
+test('parseCallout reads GitHub alerts', () => {
+  assert.deepEqual(parseCallout('[!NOTE]'), { type: 'note', fold: '', title: 'Note' });
+  assert.deepEqual(parseCallout('[!WARNING]'), { type: 'warning', fold: '', title: 'Warning' });
+});
+
+test('parseCallout reads Obsidian callouts with titles, aliases and folding', () => {
+  assert.deepEqual(parseCallout('[!tip] Custom title'), { type: 'tip', fold: '', title: 'Custom title' });
+  assert.deepEqual(parseCallout('[!info]'), { type: 'note', fold: '', title: 'Info' });
+  assert.deepEqual(parseCallout('[!bug]- Folded'), { type: 'caution', fold: '-', title: 'Folded' });
+  assert.deepEqual(parseCallout('[!faq]+'), { type: 'important', fold: '+', title: 'Faq' });
+  assert.deepEqual(parseCallout('[!whatever]'), { type: 'note', fold: '', title: 'Whatever' });
+});
+
+test('parseCallout ignores lines that are not markers', () => {
+  assert.equal(parseCallout('[!NOTE'), null);
+  assert.equal(parseCallout('see [!NOTE]'), null);
+  assert.equal(parseCallout('[!] empty'), null);
 });
