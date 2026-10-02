@@ -19,4 +19,7 @@ if (!fs.existsSync(electron)) {
   process.exit(1);
 }
 
-spawn(electron, [appDir, target], { detached: true, stdio: 'ignore' }).unref();
+// Launch through LaunchServices so launchd, not the terminal, owns the process; otherwise
+// macOS keeps the terminal app "running in the background" while markopen is open.
+const app = path.join(appDir, 'build', 'markopen.app');
+spawn('open', ['-n', '-a', app, '--args', appDir, target], { stdio: 'ignore' });
